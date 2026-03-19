@@ -1,0 +1,156 @@
+Introduction
+
+The How Websites Work room on TryHackMe is a foundational lab designed to teach beginners how websites function behind the scenes. It covers essential concepts such as DNS, HTTP/HTTPS, web servers, and how browsers interact with websites.
+
+Understanding these basics is critical for anyone starting in cybersecurity or web development.
+Objective
+
+The goal of this room is to understand:
+
+How a website loads in a browser
+
+The role of DNS in resolving domain names
+
+How HTTP/HTTPS communication works
+
+The basics of web servers and hosting
+Task 1: What is a Website?
+
+A website is a collection of web pages hosted on a server and accessible through the internet using a domain name.
+
+Key Concept
+
+When a user enters a URL in a browser, several processes happen in the background to display the webpage.
+Task 2: Domain Name System (DNS)
+
+What is DNS?
+
+The Domain Name System (DNS) translates human-readable domain names into IP addresses.
+
+For example:
+example.com → 93.184.216.34
+
+How It Works
+
+User enters a domain name in the browser
+
+The system queries DNS servers
+
+The IP address of the server is returned
+
+The browser connects to that server
+
+Key Learning
+
+DNS acts like the “phonebook of the internet.”
+Task 3: HTTP and HTTPS
+HTTP (HyperText Transfer Protocol)
+
+HTTP is the protocol used for communication between a browser and a web server.
+
+HTTPS (Secure HTTP)
+
+HTTPS is the secure version of HTTP that uses encryption.
+
+Key Differences
+
+HTTP → Not secure
+
+HTTPS → Encrypted using SSL/TLS
+
+Example Request
+GET /index.html HTTP/1.1
+Host: example.com
+Key Learning
+
+HTTPS ensures confidentiality and data integrity.
+Task 4: Web Servers
+
+A web server is responsible for storing and delivering website content.
+
+Common Web Servers
+Become a Medium member
+
+Apache
+
+Nginx
+
+How It Works
+
+Browser sends a request
+
+Server processes the request
+
+Server sends a response (HTML, CSS, JS)
+
+Key Learning
+
+Web servers handle incoming requests and return web pages.
+Task 5: HTML Basics
+
+What is HTML?
+
+HTML (HyperText Markup Language) is used to structure web pages.
+
+Example
+<html>
+<head>
+<title>My Website</title>
+</head>
+<body>
+<h1>Hello World</h1>
+</body>
+</html>
+Key Learning
+
+HTML defines the structure and content of a webpage.
+Task 6: How a Website Loads
+
+Step-by-Step Process
+
+User enters a URL in the browser
+
+DNS resolves the domain to an IP address
+
+Browser sends an HTTP/HTTPS request
+
+Server responds with webpage data
+
+Browser renders the page
+
+Key Learning
+
+Multiple systems work together to load a webpage in seconds.
+Task 7: Cookies and Sessions
+
+Cookies
+
+Small pieces of data stored in the browser.
+
+Sessions
+
+Used to maintain user state (like login sessions).
+
+Key Learning
+
+Cookies and sessions help websites remember users.
+Task 8: Final Thoughts
+
+This room focuses on understanding the core building blocks of the web rather than exploitation.
+
+Key Takeaways
+
+DNS translates domain names into IP addresses
+
+HTTP/HTTPS enables communication between client and server
+
+Web servers host and deliver content
+
+HTML structures web pages
+
+Cookies and sessions maintain user data
+Conclusion
+
+The How Websites Work room is essential for beginners in cybersecurity. Before learning hacking techniques, it is important to understand how systems function normally.
+
+This lab builds a strong foundation that helps in understanding web vulnerabilities in later stages.
